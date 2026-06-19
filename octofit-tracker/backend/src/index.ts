@@ -1,5 +1,5 @@
 import express from "express";
-import mongoose from "mongoose";
+import { connectDatabase } from "./database.js";
 import { User } from "./models/user.js";
 import { Team } from "./models/team.js";
 import { Activity } from "./models/activity.js";
@@ -12,7 +12,6 @@ const CODESPACE_NAME = process.env.CODESPACE_NAME;
 const API_URL = CODESPACE_NAME
   ? `https://${CODESPACE_NAME}-8000.app.github.dev`
   : `http://localhost:${PORT}`;
-const MONGO_URI = process.env.MONGO_URI ?? "mongodb://127.0.0.1:27017/octofit_db";
 
 app.use(express.json());
 
@@ -74,14 +73,12 @@ app.get("/", (_req, res) => {
   res.send("OctoFit Tracker backend is running");
 });
 
-mongoose
-  .connect(MONGO_URI)
+connectDatabase()
   .then(() => {
-    console.log("Connected to MongoDB:", MONGO_URI);
     console.log("API URL:", API_URL);
     app.listen(PORT, () => console.log(`Backend running on ${API_URL}`));
   })
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error("MongoDB connection error:", error);
     process.exit(1);
   });
